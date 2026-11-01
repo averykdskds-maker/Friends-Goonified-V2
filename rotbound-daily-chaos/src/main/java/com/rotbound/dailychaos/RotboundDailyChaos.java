@@ -22,10 +22,17 @@ public final class RotboundDailyChaos {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final DailyState state = new DailyState();
+    private static volatile DailyState activeState;
 
     public RotboundDailyChaos() {
+        activeState = state;
         NeoForge.EVENT_BUS.register(this);
         LOGGER.info("Rotbound Daily Chaos initialised (server-side). One setting will advance on each new UTC day.");
+    }
+
+    public static int fireTickDelayMode() {
+        DailyState current = activeState;
+        return current == null ? 0 : current.fireTickDelayMode();
     }
 
     @SubscribeEvent
