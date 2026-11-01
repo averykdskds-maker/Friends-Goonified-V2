@@ -121,6 +121,15 @@ public final class DailyState {
         }
     }
 
+    /** 0=NORMAL (vanilla), 1=FAST (half delay), 2=INSTANT (one game tick). */
+    public int fireTickDelayMode() {
+        return switch (values.getOrDefault(DailySetting.FIRE_TICK_DELAY, "NORMAL")) {
+            case "FAST" -> 1;
+            case "INSTANT" -> 2;
+            default -> 0;
+        };
+    }
+
     public boolean isEnabled(DailySetting setting) {
         return "ENABLED".equals(values.get(setting));
     }
@@ -157,14 +166,7 @@ public final class DailyState {
             case WEATHER -> runCommand(server, "weather " + value.toLowerCase() + " 1000000");
             case COMMAND_BLOCKS -> gameRule(server, "command_blocks_work", value);
             case FIRE_TICK_DELAY -> {
-                // Vanilla has no separate fire-delay rule. This supported gamerule
-                // approximates faster fire updates, but affects all random-ticked blocks.
-                int randomTickSpeed = switch (value) {
-                    case "FAST" -> 12;
-                    case "INSTANT" -> 100;
-                    default -> 3;
-                };
-                runCommand(server, "gamerule random_tick_speed " + randomTickSpeed);
+                // Applied by FireBlockMixin to the actual scheduled fire tick delay.
             }
         }
     }
