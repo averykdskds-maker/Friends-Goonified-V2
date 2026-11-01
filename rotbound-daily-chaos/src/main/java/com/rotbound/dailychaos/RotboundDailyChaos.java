@@ -116,11 +116,12 @@ public final class RotboundDailyChaos {
         }
         var left = event.getLeft();
         var right = event.getRight();
-        boolean usesEnchantments = left.isEnchanted()
-                || right.isEnchanted()
-                || event.getOutput().isEnchanted()
-                || right.is(Items.ENCHANTED_BOOK);
-        if (usesEnchantments) {
+        // Allow repairing/renaming an already-enchanted item with a plain material.
+        // Cancel only when the operation supplies enchantments or creates an enchanted output.
+        boolean addsEnchantments = right.isEnchanted()
+                || right.is(Items.ENCHANTED_BOOK)
+                || (!left.isEnchanted() && event.getOutput().isEnchanted());
+        if (addsEnchantments) {
             event.setCanceled(true);
         }
     }
