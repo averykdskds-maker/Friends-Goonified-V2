@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundSource;
 import net.neoforged.fml.loading.FMLPaths;
 import org.slf4j.Logger;
@@ -173,7 +175,7 @@ public final class DailyState {
     }
 
     private void runCommand(MinecraftServer server, String command) {
-        CommandSourceStack source = server.createCommandSourceStack().withPermission(4);
+        CommandSourceStack source = server.createCommandSourceStack();
         server.getCommands().performPrefixedCommand(source, command);
     }
 
@@ -187,7 +189,12 @@ public final class DailyState {
 
         server.getPlayerList().broadcastSystemMessage(message, false);
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 0.85F, 1.0F);
+            player.connection.send(new ClientboundSoundPacket(
+                    BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE),
+                    SoundSource.MASTER,
+                    player.getX(), player.getY(), player.getZ(),
+                    0.85F, 1.0F, player.getRandom().nextLong()
+            ));
         }
     }
 
